@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCTIS NETWORK MONITORING</title>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    .red-row {
+            background-color: red;
+        }
+    .gray-row {
+            background-color: gray;
+        }
+    .yellow-row {
+            background-color: yellow;
+        }
+    .green-row {
+            background-color: lightgreen;
+        }
+    html,body{ 
+	scroll-behavior: smooth}
+    </style>
+</head>
+<body>
+
+<div id="top"> TOP </div>
+<table id="json-table">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Name</th>
+            <th>Last Poll</th>
+            <th>IP</th>
+            <th>RTT / %</th>
+            <th>Down polls</th>
+            <th>Down Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Table body will be populated by JavaScript -->
+    </tbody>
+</table>
+<script>
+function setFocusToTextBox(){
+    document.getElementById("top").scrollIntoView();
+
+}
+function fetchDataAndUpdateTable() {
+    fetch('/result/')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#json-table tbody');
+            tableBody.innerHTML = ''; // Clear previous data
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                // Check if status is "false", if so, add class to mark it red
+                const rowClass = item.status === "40" ? 'red-row' : 
+				 item.status === "30" ? 'gray-row' : 
+				 item.status === "20" ? 'yellow-row' : 
+				 'green-row';
+                //const rowClass = item.status === "GrayedTimedOut" ? 'gray-row' : 'green-row';
+                row.innerHTML = `
+                    <td>${item.status}</td>
+                    <td>${item.name}</td>
+                    <td>${item.time}</td>
+                    <td>${item.ip}</td>
+                    <td>${item.rtt}</td>
+                    <td>${item.count}</td>
+                    <td>${item.downtime}</td>
+                `;
+                                row.classList.add(rowClass); // Add the class to the row
+
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+	
+// setFocusToTextBox();
+
+//    document.getElementById("top").scrollIntoView();
+
+}
+
+// Initial call to fetch data
+fetchDataAndUpdateTable();
+
+
+// Set interval to fetch data every 10 seconds
+setInterval(fetchDataAndUpdateTable, 5000);
+
+setInterval(setFocusToTextBox, 60000);
+
+
+</script>
+
+
+</body>
+</html>
